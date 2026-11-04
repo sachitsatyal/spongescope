@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: fct_pairs
+    description: Labelled lncRNA-miRNA pairs with cold-start splits. Training reads this table.
+    columns:
+      - name: pair_id
+        data_tests: [unique, not_null]
+      - name: label
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: split
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['train', 'val', 'test']
+
+  - name: dim_lncrna
+    columns:
+      - name: gene_id
+        data_tests: [unique, not_null]
+      - name: transcript_id
+        data_tests: [unique, not_null]
+
+  - name: dim_mirna
+    columns:
+      - name: mimat_id
+        data_tests: [unique, not_null]

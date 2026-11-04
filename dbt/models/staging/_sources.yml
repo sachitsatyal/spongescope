@@ -9,3 +9,5 @@ sources:
       - name: mirna_mature
       - name: encori_mirna_lncrna
       - name: gtex_median_tpm
+      - name: lnc_clusters
+        description: MMseqs2 clusters of representative lncRNA transcripts (Colab, step 2.3).

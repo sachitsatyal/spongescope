@@ -14,6 +14,9 @@ vars:
   max_lncrna_length: 25000
   negative_ratio: 10
   seed: 42
+  train_frac: 0.8
+  val_frac: 0.1
+  mirna_holdout_frac: 0.1
 
 models:
   spongescope:
