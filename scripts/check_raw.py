@@ -24,6 +24,10 @@ CHECKS = {
         SELECT COUNT(DISTINCT split_part(gene_id, '.', 1)) FROM raw.lncrna_transcripts""",
     "lncRNA length median / max": """
         SELECT CAST(MEDIAN(length) AS INT) || ' / ' || MAX(length) FROM raw.lncrna_transcripts""",
+    "ENCORI miRNAs found in miRBase by MIMAT (%)": """
+        SELECT ROUND(100.0 * AVG(CASE WHEN m.mimat_id IS NOT NULL THEN 1 ELSE 0 END), 1)
+        FROM (SELECT DISTINCT miRNAid FROM raw.encori_mirna_lncrna) e
+        LEFT JOIN raw.mirna_mature m ON e.miRNAid = m.mimat_id""",
 }
 
 con = duckdb.connect(str(DB), read_only=True)
