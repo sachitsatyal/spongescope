@@ -1,0 +1,22 @@
+# Single source of truth for raw data. Change versions here, nowhere else.
+sources:
+  gencode_lncrna_fasta:
+    version: "GENCODE release 50"
+    url: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.lncRNA_transcripts.fa.gz
+    filename: gencode/gencode.v50.lncRNA_transcripts.fa.gz
+
+  mirbase_mature:
+    version: "miRBase current"
+    url: https://mirbase.org/download/mature.fa
+    filename: mirbase/mature.fa
+
+  encori_mirna_lncrna:
+    version: "ENCORI API hg38, clipExpNum>=1"
+    url: https://rnasysu.com/encori/api/miRNATarget/?assembly=hg38&geneType=lncRNA&miRNA=all&clipExpNum=1&degraExpNum=0&pancancerNum=0&programNum=0&program=None&target=all&cellType=all
+    filename: encori/encori_hg38_mirna_lncrna_clip1.tsv
+    timeout: 900
+
+  gtex_median_tpm:
+    version: "GTEx v10"
+    url: https://storage.googleapis.com/adult-gtex/bulk-gex/v10/rna-seq/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_median_tpm.gct.gz
+    filename: gtex/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_median_tpm.gct.gz

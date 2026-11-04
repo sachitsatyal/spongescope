@@ -1,4 +1,4 @@
-# Python-generated files
+﻿# Python-generated files
 __pycache__/
 *.py[oc]
 build/
@@ -8,7 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
-data/
 tools/
 mlruns/
 *.pt
@@ -18,3 +17,5 @@ __pycache__/
 .venv/
 dbt/target/
 dbt/logs/
+data/*.duckdb
+data/*.duckdb.wal
