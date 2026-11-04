@@ -1,0 +1,27 @@
+# Phase 3 feature settings (Hydra). Override on the command line, e.g.
+#   uv run python -m spongescope.features.rnafm_embed rnafm.batch_size=8
+paths:
+  processed: data/processed
+  features: data/features
+
+rnafm:
+  window: 1000        # nt per window (RNA-FM max is 1022)
+  stride: 500         # 50% overlap; overlapping positions are averaged
+  batch_size: 16      # windows per forward pass; lower if CUDA out of memory
+  fp16: true
+  layer: 12           # last transformer layer
+  # Official weights server returned 403 (2026-11-04); same file from the authors' HF repo.
+  weights_url: https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth
+  weights_bytes: 1194424423
+
+accessibility:        # RNAplfold settings commonly used for miRNA target sites
+  window_size: 80     # -W
+  max_bp_span: 40     # -L
+  ulength: 14         # -u : unpaired probability of the 14-nt stretch ending at each position
+  workers: 16         # parallel processes (you have 24 threads)
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: outputs/features/${now:%Y-%m-%d_%H-%M-%S}

@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: fct_lncrna_tissue_expression
+    description: GTEx v10 median TPM per modeled lncRNA per tissue (long format).
+    columns:
+      - name: gene_id
+        data_tests: [not_null]
+      - name: tissue
+        data_tests: [not_null]
+
+  - name: dim_lncrna_tissue_profile
+    description: Per-lncRNA tissue breadth, top tissue and specificity (tau).
+    columns:
+      - name: gene_id
+        data_tests: [unique, not_null]
+
+  - name: fct_mirna_tissue_expression
+    description: miRNATissueAtlas 2025 mean/std per modeled miRNA per biotype/organ/tissue.
+    columns:
+      - name: mimat_id
+        data_tests: [not_null]
+      - name: tissue
+        data_tests: [not_null]

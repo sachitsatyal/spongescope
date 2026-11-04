@@ -25,3 +25,9 @@ sources:
     version: "GTEx v10"
     url: https://storage.googleapis.com/adult-gtex/bulk-gex/v10/rna-seq/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_median_tpm.gct.gz
     filename: gtex/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_median_tpm.gct.gz
+
+  mirna_tissue_atlas:
+    version: "miRNATissueAtlas 2025, human miRNA per-tissue average/std"
+    url: https://web.ccb.uni-saarland.de/mirnatissueatlas_2025/download_file/mirna_avg_std_human/
+    filename: mirna_tissue_atlas/mirna_avg_std_human.parquet
+    timeout: 600

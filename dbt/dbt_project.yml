@@ -17,6 +17,7 @@ vars:
   train_frac: 0.8
   val_frac: 0.1
   mirna_holdout_frac: 0.1
+  expressed_tpm: 1.0
 
 models:
   spongescope:
