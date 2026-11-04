@@ -5,6 +5,11 @@ sources:
     url: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.lncRNA_transcripts.fa.gz
     filename: gencode/gencode.v50.lncRNA_transcripts.fa.gz
 
+  gencode_lncrna_gtf:
+    version: "GENCODE release 50"
+    url: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.long_noncoding_RNAs.gtf.gz
+    filename: gencode/gencode.v50.long_noncoding_RNAs.gtf.gz
+
   mirbase_mature:
     version: "miRBase current"
     url: https://mirbase.org/download/mature.fa

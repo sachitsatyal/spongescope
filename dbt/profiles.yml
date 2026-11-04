@@ -1,0 +1,17 @@
+spongescope:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/spongescope.duckdb
+      threads: 4
+    prod:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT', 'not_set') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', 'not_set') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', 'not_set') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
+      database: SPONGESCOPE
+      schema: PUBLIC
+      threads: 4

@@ -20,17 +20,17 @@ CHECKS = {
         SELECT ROUND(100.0 * AVG(CASE WHEN m.mirna_name IS NOT NULL THEN 1 ELSE 0 END), 1)
         FROM (SELECT DISTINCT miRNAname FROM raw.encori_mirna_lncrna) e
         LEFT JOIN raw.mirna_mature m ON e.miRNAname = m.mirna_name""",
-    "GENCODE lncRNA genes": """
-        SELECT COUNT(DISTINCT split_part(gene_id, '.', 1)) FROM raw.lncrna_transcripts""",
-    "lncRNA length median / max": """
-        SELECT CAST(MEDIAN(length) AS INT) || ' / ' || MAX(length) FROM raw.lncrna_transcripts""",
     "ENCORI miRNAs found in miRBase by MIMAT (%)": """
         SELECT ROUND(100.0 * AVG(CASE WHEN m.mimat_id IS NOT NULL THEN 1 ELSE 0 END), 1)
         FROM (SELECT DISTINCT miRNAid FROM raw.encori_mirna_lncrna) e
         LEFT JOIN raw.mirna_mature m ON e.miRNAid = m.mimat_id""",
+    "GENCODE lncRNA genes": """
+        SELECT COUNT(DISTINCT split_part(gene_id, '.', 1)) FROM raw.lncrna_transcripts""",
+    "lncRNA length median / max": """
+        SELECT CAST(MEDIAN(length) AS INT) || ' / ' || MAX(length) FROM raw.lncrna_transcripts""",
 }
 
 con = duckdb.connect(str(DB), read_only=True)
 for label, sql in CHECKS.items():
-    print(f"{label:<40} {con.execute(sql).fetchall()[0][0]}")
+    print(f"{label:<45} {con.execute(sql).fetchall()[0][0]}")
 con.close()

@@ -43,6 +43,33 @@ def load_lncrna() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def load_exons() -> pd.DataFrame:
+    path = next((RAW / "gencode").glob("*.long_noncoding_RNAs.gtf.gz"))
+    cols = [
+        "chrom",
+        "source",
+        "feature",
+        "start",
+        "end",
+        "score",
+        "strand",
+        "frame",
+        "attributes",
+    ]
+    gtf = pd.read_csv(
+        path, sep="\t", comment="#", header=None, names=cols, dtype={"chrom": str}
+    )
+    exons = gtf[gtf["feature"] == "exon"].copy()
+    for key in ["gene_id", "transcript_id", "exon_number"]:
+        exons[key] = exons["attributes"].str.extract(
+            rf'{key} "?([^";]+)"?;', expand=False
+        )
+    exons["exon_number"] = exons["exon_number"].astype(int)
+    return exons[
+        ["transcript_id", "gene_id", "chrom", "start", "end", "strand", "exon_number"]
+    ]
+
+
 def load_mirna() -> pd.DataFrame:
     # miRBase header: >hsa-let-7a-5p MIMAT0000062 Homo sapiens let-7a-5p
     rows = []
@@ -92,6 +119,7 @@ def run(con: duckdb.DuckDBPyConnection, sql: str) -> list:
 def main() -> None:
     tables = {
         "lncrna_transcripts": load_lncrna(),
+        "gencode_lncrna_exons": load_exons(),
         "mirna_mature": load_mirna(),
         "encori_mirna_lncrna": load_encori(),
         "gtex_median_tpm": load_gtex(),

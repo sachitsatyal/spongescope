@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: stg_lncrna_transcripts
+    columns:
+      - name: transcript_id
+        data_tests: [unique, not_null]
+      - name: gene_id
+        data_tests: [not_null]
+  - name: stg_gencode_exons
+    columns:
+      - name: transcript_id
+        data_tests: [not_null]
+  - name: stg_mirna
+    columns:
+      - name: mimat_id
+        data_tests: [unique, not_null]
+  - name: stg_encori_sites
+    columns:
+      - name: mimat_id
+        data_tests: [not_null]
+      - name: gene_id
+        data_tests: [not_null]
+  - name: stg_gtex_median_tpm
+    columns:
+      - name: gene_id
+        data_tests: [not_null]
