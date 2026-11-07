@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
@@ -61,7 +61,7 @@ def main() -> None:
             "sha256": sha256(dest),
             "bytes": dest.stat().st_size,
             "downloaded_utc": manifest.get(name, {}).get("downloaded_utc")
-            or datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            or datetime.now(UTC).isoformat(timespec="seconds"),
         }
 
     MANIFEST.write_text(json.dumps(manifest, indent=2))

@@ -1,0 +1,38 @@
+# Neural model training (Hydra). Example:
+#   uv run python -m spongescope.train
+#   uv run python -m spongescope.train model.use_structure=false run_name=lncmirpath_seq_only
+defaults:
+  - model: lncmirpath
+  - _self_
+
+run_name: ${model.name}
+seed: 42
+
+paths:
+  processed: data/processed
+  features: data/features
+  predictions: data/predictions
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment: spongescope
+
+data:
+  batch_size: 64
+  num_workers: 0        # Windows: keep 0 (collate is cheap)
+
+trainer:
+  max_epochs: 30
+  patience: 5           # early stopping on val AUPR
+  precision: 16-mixed
+  accelerator: auto
+  log_every_n_steps: 50
+
+eval:
+  n_boot: 1000
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: outputs/train/${run_name}/${now:%Y-%m-%d_%H-%M-%S}

@@ -56,18 +56,12 @@ def load_exons() -> pd.DataFrame:
         "frame",
         "attributes",
     ]
-    gtf = pd.read_csv(
-        path, sep="\t", comment="#", header=None, names=cols, dtype={"chrom": str}
-    )
+    gtf = pd.read_csv(path, sep="\t", comment="#", header=None, names=cols, dtype={"chrom": str})
     exons = gtf[gtf["feature"] == "exon"].copy()
     for key in ["gene_id", "transcript_id", "exon_number"]:
-        exons[key] = exons["attributes"].str.extract(
-            rf'{key} "?([^";]+)"?;', expand=False
-        )
+        exons[key] = exons["attributes"].str.extract(rf'{key} "?([^";]+)"?;', expand=False)
     exons["exon_number"] = exons["exon_number"].astype(int)
-    return exons[
-        ["transcript_id", "gene_id", "chrom", "start", "end", "strand", "exon_number"]
-    ]
+    return exons[["transcript_id", "gene_id", "chrom", "start", "end", "strand", "exon_number"]]
 
 
 def load_mirna() -> pd.DataFrame:
@@ -100,9 +94,7 @@ def load_encori() -> pd.DataFrame:
 def load_gtex() -> pd.DataFrame:
     path = next((RAW / "gtex").glob("*gene_median_tpm.gct.gz"))
     wide = pd.read_csv(path, sep="\t", skiprows=2)
-    wide = wide.rename(
-        columns={"Name": "gene_id_versioned", "Description": "gene_name"}
-    )
+    wide = wide.rename(columns={"Name": "gene_id_versioned", "Description": "gene_name"})
     wide["gene_id"] = wide["gene_id_versioned"].str.split(".").str[0]
     return wide.melt(
         id_vars=["gene_id", "gene_id_versioned", "gene_name"],

@@ -20,6 +20,11 @@ accessibility:        # RNAplfold settings commonly used for miRNA target sites
   ulength: 14         # -u : unpaired probability of the 14-nt stretch ending at each position
   workers: 16         # parallel processes (you have 24 threads)
 
+structure:            # per-window MFE dot-brackets for the LncMiRPath baseline
+  segment: 200        # paper: 200-nt segments
+  overlap: 50         # paper: 50-nt overlap -> stride 150
+  workers: 16
+
 hydra:
   job:
     chdir: false

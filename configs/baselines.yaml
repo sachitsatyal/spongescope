@@ -1,0 +1,20 @@
+# Classic (non-neural) baselines. Run:  uv run python -m spongescope.baselines.classic
+seed: 42
+
+paths:
+  processed: data/processed
+  features: data/features
+  predictions: data/predictions
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment: spongescope
+
+eval:
+  n_boot: 1000
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: outputs/baselines/${now:%Y-%m-%d_%H-%M-%S}
