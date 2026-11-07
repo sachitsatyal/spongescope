@@ -30,10 +30,10 @@ models:
         data_tests: [not_null]
 
   - name: int_negative_pairs
-    description: Negatives at negative_ratio per positive, half degree-matched, half random.
+    description: Negatives at negative_ratio per positive - seed-matched (hard), degree-matched, random.
     columns:
       - name: pair_type
         data_tests:
           - accepted_values:
               arguments:
-                values: ['degree_matched', 'random']
+                values: ['seed_matched', 'degree_matched', 'random']

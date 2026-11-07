@@ -1,6 +1,10 @@
 """Evaluation used by every model, so all numbers in the benchmark are comparable.
 
-Groups: val, test (all), test_cold_lncrna, test_cold_both.
+Groups: val, test (all), test_cold_lncrna, test_cold_both,
+test_seed_controlled (cold test pairs whose lncRNA has a 7mer site for the miRNA - seed
+matching cannot separate these, so it measures what a model adds beyond seeds), and the
+sanity-check groups test_warm (random pair split, balanced negatives) and test_paper
+(original paper setup: random 1:1 negatives + random pair split).
 Per group: AUROC, AUPR, AUPR lift over the positive rate, expected calibration error,
 mean per-lncRNA AUROC (each lncRNA ranks its own miRNAs - immune to hub/length shortcuts),
 and 95% CIs from a bootstrap that resamples whole lncRNAs (pairs of one lncRNA are not
@@ -18,6 +22,12 @@ GROUPS = {
     "test": lambda d: d["split"] == "test",
     "test_cold_lncrna": lambda d: d["eval_group"] == "cold_lncrna",
     "test_cold_both": lambda d: d["eval_group"] == "cold_both",
+    "test_seed_controlled": lambda d: (
+        d["eval_group"].isin(["cold_lncrna", "cold_both"])
+        & d.get("has_seed_site", pd.Series(False, index=d.index)).fillna(False).astype(bool)
+    ),
+    "test_warm": lambda d: d["eval_group"] == "warm",
+    "test_paper": lambda d: d["eval_group"] == "paper",
 }
 
 
@@ -55,8 +65,11 @@ def _bootstrap(genes, y, p, n_boot: int, seed: int) -> dict[str, tuple[float, fl
         if 0 < yb.sum() < len(yb):
             au.append(roc_auc_score(yb, p[idx]))
             ap.append(average_precision_score(yb, p[idx]))
-    q = lambda v: (float(np.percentile(v, 2.5)), float(np.percentile(v, 97.5)))
-    return {"auroc": q(au), "aupr": q(ap)}
+
+    def ci(v: list[float]) -> tuple[float, float]:
+        return float(np.percentile(v, 2.5)), float(np.percentile(v, 97.5))
+
+    return {"auroc": ci(au), "aupr": ci(ap)}
 
 
 def evaluate(

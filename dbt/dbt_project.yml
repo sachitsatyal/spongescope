@@ -18,6 +18,7 @@ vars:
   val_frac: 0.1
   mirna_holdout_frac: 0.1
   expressed_tpm: 1.0
+  hard_negative_frac: 0.5   # share of negatives that contain a 7mer seed site (Phase 4.1)
 
 models:
   spongescope:

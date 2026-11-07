@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import mlflow
@@ -25,6 +26,11 @@ def flat_params(cfg: DictConfig) -> dict[str, str]:
 
     walk("", cont)
     return out
+
+
+def dataset_hash(path: Path) -> str:
+    """Short content hash of fct_pairs.parquet, logged with every run (data version)."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:12]
 
 
 def setup(cfg: DictConfig) -> None:

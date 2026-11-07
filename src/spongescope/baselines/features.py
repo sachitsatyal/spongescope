@@ -14,6 +14,8 @@ FEATURE_SETS = {
     # Shortcut checks: if these score well, the benchmark is learnable without biology.
     "length_only": ["log_len"],
     "mirna_popularity": ["mir_log_degree"],
+    # Training-set positive counts of both RNAs (the shortcut random-pair negatives allow).
+    "node_degree": ["lnc_log_degree", "mir_log_degree"],
     # Biology baseline: seed matches + accessibility (what TargetScan-style tools use).
     "seed_match": [
         "log_len",
@@ -38,10 +40,12 @@ def build_pair_features(
     mir_seq = dict(zip(mir.mimat_id, mir.sequence, strict=True))
     train_pos = pairs[(pairs.split == "train") & (pairs.label == 1)]
     degree = train_pos.groupby("mimat_id").size()
+    lnc_degree = train_pos.groupby("gene_id").size()
 
     rows = []
     for tid, grp in tqdm(pairs.groupby("transcript_id", sort=False), desc="pair features"):
         seq = lnc.at[tid, "sequence"]
+        lnc_deg = float(np.log1p(lnc_degree.get(grp.gene_id.iloc[0], 0)))
         acc = None
         if acc_dir is not None and (acc_dir / f"{tid}.npy").exists():
             acc = np.load(acc_dir / f"{tid}.npy")
@@ -54,6 +58,7 @@ def build_pair_features(
                     "log_len": float(np.log10(len(seq))),
                     "gc": gc,
                     "mir_log_degree": float(np.log1p(degree.get(mid, 0))),
+                    "lnc_log_degree": lnc_deg,
                 }
             )
             rows.append(f)

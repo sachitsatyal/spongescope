@@ -40,3 +40,22 @@ def test_ece_and_flatten():
     assert expected_calibration_error(y, np.array([0.0, 0.0, 1.0, 1.0])) == 0
     flat = flatten(evaluate(_frame(), n_boot=0))
     assert "test_cold_both/aupr" in flat
+
+
+def test_seed_controlled_group():
+    df = _frame()
+    df["has_seed_site"] = df.index % 2 == 0
+    t = evaluate(df, n_boot=0).set_index("group")
+    assert "test_seed_controlled" in t.index
+    sub = df[(df.split == "test") & df.has_seed_site]
+    assert t.at["test_seed_controlled", "n_pos"] + t.at["test_seed_controlled", "n_neg"] == len(sub)
+    assert "test_seed_controlled" not in evaluate(_frame(), n_boot=0).group.values
+
+
+def test_seed_group_excludes_warm_rows():
+    df = _frame()
+    df["has_seed_site"] = True
+    df.loc[df.eval_group == "cold_both", "eval_group"] = "warm"
+    t = evaluate(df, n_boot=0).set_index("group")
+    n_cold = (df.eval_group == "cold_lncrna").sum()
+    assert t.at["test_seed_controlled", "n_pos"] + t.at["test_seed_controlled", "n_neg"] == n_cold

@@ -20,6 +20,8 @@ mlflow:
 data:
   batch_size: 64
   num_workers: 0        # Windows: keep 0 (collate is cheap)
+  warm_check: false     # true = random pair split, balanced negatives (sanity check)
+  paper_style: false    # true = original paper setup: random 1:1 negatives + random pair split
 
 trainer:
   max_epochs: 30

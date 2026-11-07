@@ -2,6 +2,8 @@
 --   split:      train / val / test (cold lncRNA, by sequence cluster)
 --   eval_group: for test rows, cold_lncrna (miRNA seen in training) or cold_both
 -- Train/val pairs that use a held-out miRNA are dropped so cold_both stays clean.
+--   has_seed_site: lncRNA contains a canonical 7mer site (7mer-m8 or 7mer-A1) for the miRNA.
+--                  Defines the seed-controlled evaluation group.
 with pairs as (
     select
         gene_id, transcript_id, mimat_id, label, pair_type,
@@ -16,10 +18,26 @@ with pairs as (
     from {{ ref('int_negative_pairs') }}
 ),
 
+sites as (
+    select
+        p.gene_id,
+        p.mimat_id,
+        contains(r.sequence, reverse(translate(substr(m.sequence, 2, 7), 'ACGU', 'UGCA')))
+            or contains(
+                r.sequence, reverse(translate(substr(m.sequence, 2, 6), 'ACGU', 'UGCA')) || 'A'
+            ) as has_seed_site
+    from pairs as p
+    inner join {{ ref('int_gene_representative') }} as r
+        on r.gene_id = p.gene_id
+    inner join {{ ref('stg_mirna') }} as m
+        on m.mimat_id = p.mimat_id
+),
+
 labelled as (
     select
         p.gene_id || '|' || p.mimat_id as pair_id,
         p.*,
+        st.has_seed_site,
         s.cluster_id,
         s.lncrna_split,
         h.is_holdout as mirna_holdout,
@@ -37,6 +55,9 @@ labelled as (
         on s.gene_id = p.gene_id
     inner join {{ ref('int_mirna_holdout') }} as h
         on h.mimat_id = p.mimat_id
+    inner join sites as st
+        on st.gene_id = p.gene_id
+       and st.mimat_id = p.mimat_id
 )
 
 select *

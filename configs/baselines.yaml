@@ -1,5 +1,6 @@
 # Classic (non-neural) baselines. Run:  uv run python -m spongescope.baselines.classic
 seed: 42
+paper_style: false   # true = original paper setup (random 1:1 negatives, random pair split)
 
 paths:
   processed: data/processed

@@ -8,7 +8,14 @@ ROOT = Path(__file__).resolve().parents[1]
 PRED = ROOT / "data" / "predictions"
 OUT = ROOT / "reports" / "benchmark.md"
 
-GROUP_ORDER = ["test_cold_lncrna", "test_cold_both", "val"]
+GROUP_ORDER = [
+    "test_cold_lncrna",
+    "test_seed_controlled",
+    "test_cold_both",
+    "test_warm",
+    "test_paper",
+    "val",
+]
 
 rows = []
 for csv in sorted(PRED.glob("*.metrics.csv")):
