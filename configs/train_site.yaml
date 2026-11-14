@@ -1,0 +1,41 @@
+# SpongeScope site model (Hydra). Example:
+#   uv run python -m spongescope.train_site
+#   uv run python -m spongescope.train_site model.use_rnafm=false run_name=sitemil_no_rnafm
+defaults:
+  - model: sitemil
+  - _self_
+
+run_name: ${model.name}
+seed: 42
+
+paths:
+  processed: data/processed
+  features: data/features
+  predictions: data/predictions
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment: spongescope
+
+data:
+  batch_size: 64
+  num_workers: 0
+  max_sites: 16         # must be <= sites.max_sites used to build the site table
+  window: 40            # nt on each side of p2 (81-nt window)
+
+trainer:
+  max_epochs: 20
+  patience: 4
+  precision: 16-mixed
+  accelerator: auto
+  gradient_clip_val: 1.0
+  log_every_n_steps: 50
+
+eval:
+  n_boot: 1000
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: outputs/train/${run_name}/${now:%Y-%m-%d_%H-%M-%S}

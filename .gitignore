@@ -24,3 +24,4 @@ dbt/.user.yml
 outputs/
 mlflow.db
 mlartifacts/
+multirun/

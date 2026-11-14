@@ -1,0 +1,12 @@
+# SpongeScope site model (Phase 5a). Ablation switches are used in Phase 5b.
+name: sitemil
+d_model: 128
+n_heads: 4
+n_layers: 2
+ff_dim: 256
+dropout: 0.1
+lr: 3.0e-4
+weight_decay: 0.01
+use_rnafm: true
+use_accessibility: true
+use_cross_attention: true

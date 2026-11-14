@@ -25,6 +25,10 @@ structure:            # per-window MFE dot-brackets for the LncMiRPath baseline
   overlap: 50         # paper: 50-nt overlap -> stride 150
   workers: 16
 
+sites:                # candidate miRNA target sites for the SpongeScope model (Phase 5a)
+  max_sites: 16       # keep the strongest sites per pair (type, then accessibility)
+  au_window: 30       # +/- nt for local AU content
+
 hydra:
   job:
     chdir: false
