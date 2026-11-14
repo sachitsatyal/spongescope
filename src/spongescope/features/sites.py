@@ -39,6 +39,21 @@ SITE_COLS = [
     "acc_u14",
 ]
 COUNT_COLS = [f"n_{t}" for t in SITE_TYPES]
+# columns that must be integers wherever a site table is built (training AND serving)
+INT_SITE_COLS = [
+    "p2",
+    "type_id",
+    "wc2",
+    "wc3",
+    "wc4",
+    "wc5",
+    "wc6",
+    "wc7",
+    "wc8",
+    "n_wobble",
+    "a1",
+    "supp",
+]
 
 
 def site_rows(
@@ -116,21 +131,7 @@ def build_site_tables(
     block = np.vstack(site_blocks) if site_blocks else np.zeros((0, len(SITE_COLS) - 1))
     sites = pd.DataFrame(block, columns=SITE_COLS[1:])
     sites.insert(0, "pair_id", site_ids)
-    int_cols = [
-        "p2",
-        "type_id",
-        "wc2",
-        "wc3",
-        "wc4",
-        "wc5",
-        "wc6",
-        "wc7",
-        "wc8",
-        "n_wobble",
-        "a1",
-        "supp",
-    ]
-    sites[int_cols] = sites[int_cols].astype(np.int64)
+    sites[INT_SITE_COLS] = sites[INT_SITE_COLS].astype(np.int64)
     pair_tab = pd.DataFrame(
         pair_rows, columns=["pair_id", "n_sites", "n_kept", *COUNT_COLS, "log_len"]
     )

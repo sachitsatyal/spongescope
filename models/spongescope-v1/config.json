@@ -1,0 +1,71 @@
+{
+  "name": "spongescope",
+  "run_name": "sitemil_s2",
+  "exported_utc": "2026-11-14T17:53:10+00:00",
+  "checkpoint": "multirun/2026-11-14/10-23-20/1/checkpoints/best.ckpt",
+  "model": {
+    "d_model": 128,
+    "n_heads": 4,
+    "n_layers": 2,
+    "ff_dim": 256,
+    "dropout": 0.1,
+    "use_rnafm": true,
+    "use_accessibility": true,
+    "use_cross_attention": true
+  },
+  "dims": {
+    "tok_dim": 642,
+    "mir_dim": 640,
+    "site_feat_dim": 21,
+    "pair_feat_dim": 9,
+    "window": 40
+  },
+  "temperature": 0.913775133805396,
+  "window": 40,
+  "max_sites": 16,
+  "au_window": 30,
+  "accessibility": {
+    "window_size": 80,
+    "max_bp_span": 40,
+    "ulength": 14,
+    "workers": 16
+  },
+  "rnafm": {
+    "layer": 12,
+    "window": 1000,
+    "stride": 500
+  },
+  "n_parameters": 697857,
+  "metrics": {
+    "val": {
+      "auroc": 0.8597838670386704,
+      "aupr": 0.45055525693608994,
+      "per_lnc_auroc": 0.8148056942228438,
+      "ece": 0.012195460433494395
+    },
+    "test": {
+      "auroc": 0.8421748784586083,
+      "aupr": 0.301986384501877,
+      "per_lnc_auroc": 0.8184411570194948,
+      "ece": 0.00930451238438741
+    },
+    "test_cold_lncrna": {
+      "auroc": 0.8407129170671643,
+      "aupr": 0.30295017118472767,
+      "per_lnc_auroc": 0.8199715307316843,
+      "ece": 0.009003217438617804
+    },
+    "test_cold_both": {
+      "auroc": 0.8567328222049689,
+      "aupr": 0.2971237687625501,
+      "per_lnc_auroc": 0.8025619540663574,
+      "ece": 0.01654413828182431
+    },
+    "test_seed_controlled": {
+      "auroc": 0.7530522814549249,
+      "aupr": 0.3124368890769056,
+      "per_lnc_auroc": 0.7293643540884339,
+      "ece": 0.016439954484986752
+    }
+  }
+}
