@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: int_clip_site_intervals
+    description: >
+      ENCORI CLIP peaks in 0-based transcript coordinates, one row per site per transcript.
+      Used to label candidate sites as experimentally supported (Phase 5 v2).
+    columns:
+      - name: site_id
+        data_tests: [not_null]
+      - name: transcript_id
+        data_tests: [not_null]
+      - name: tx_start
+        data_tests: [not_null]

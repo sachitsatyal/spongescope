@@ -4,6 +4,9 @@ Per pair: up to max_sites candidate sites. Each site = a (2*window+1)-nt lncRNA 
 on p2 (RNA-FM embedding + accessibility, or one-hot when RNA-FM is ablated) + 21 site features.
 The miRNA is given as per-nucleotide tokens. torch is imported lazily so the numpy side is
 testable without it.
+
+If the site table carries site_label / label_known (features.site_labels), the batch also
+carries per-site targets and a mask, for the auxiliary site loss in v2.
 """
 
 from __future__ import annotations
@@ -90,6 +93,14 @@ class SiteStore:
 
         sites = sites.sort_values(["pair_id", "p2"], kind="stable").reset_index(drop=True)
         mat = site_matrix(sites, use_accessibility)
+        self.has_site_labels = "site_label" in sites.columns
+        lab = (
+            np.column_stack(
+                [sites["site_label"].to_numpy(np.float32), sites["label_known"].to_numpy(bool)]
+            )
+            if self.has_site_labels
+            else None
+        )
         pid = sites["pair_id"].to_numpy()
         cuts = np.flatnonzero(pid[1:] != pid[:-1]) + 1
         starts = np.concatenate([[0], cuts]) if len(pid) else np.array([], int)
@@ -97,6 +108,9 @@ class SiteStore:
         p2 = sites["p2"].to_numpy()
         self.site_p2 = {pid[s]: p2[s:e] for s, e in zip(starts, ends, strict=True)}
         self.site_feat = {pid[s]: mat[s:e] for s, e in zip(starts, ends, strict=True)}
+        self.site_label = (
+            {pid[s]: lab[s:e] for s, e in zip(starts, ends, strict=True)} if lab is not None else {}
+        )
         self.pair_feat = dict(zip(pair_tab["pair_id"], pair_matrix(pair_tab), strict=True))
 
         self._emb: dict[str, np.ndarray] = {}
@@ -183,6 +197,8 @@ class SiteCollate:
         tok_mask = np.zeros((b, s, st.T), dtype=bool)
         site_feat = np.zeros((b, s, SITE_FEAT_DIM), dtype=np.float32)
         site_mask = np.zeros((b, s), dtype=bool)
+        site_label = np.zeros((b, s), dtype=np.float32)
+        label_mask = np.zeros((b, s), dtype=bool)
         pair_feat = np.zeros((b, PAIR_FEAT_DIM), dtype=np.float32)
         for r, (i, k) in enumerate(zip(idx, n_sites, strict=True)):
             pid, tid = self.pids[i], self.tids[i]
@@ -192,6 +208,10 @@ class SiteCollate:
             if k:
                 site_feat[r, :k] = st.site_feat[pid][:k]
                 site_mask[r, :k] = True
+                if st.has_site_labels:
+                    lab = st.site_label[pid][:k]
+                    site_label[r, :k] = lab[:, 0]
+                    label_mask[r, :k] = lab[:, 1].astype(bool)
         mirs = [st.mir_tok[m] for m in self.mids[idx]]
         lm = max(len(m) for m in mirs)
         mir_tok = np.zeros((b, lm, st.mir_dim), dtype=np.float16)
@@ -208,6 +228,8 @@ class SiteCollate:
             "mir_tok": mir_tok,
             "mir_mask": mir_mask,
             "label": self.labels[idx],
+            "site_label": site_label,
+            "label_mask": label_mask,
         }
 
     def __call__(self, idx):

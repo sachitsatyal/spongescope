@@ -1,0 +1,15 @@
+# SpongeScope v2: same architecture as sitemil plus per-site supervision from CLIP positions.
+# site_loss_weight=0 with predict_sites=true isolates the extra head from the extra loss.
+name: sitemil_v2
+d_model: 128
+n_heads: 4
+n_layers: 2
+ff_dim: 256
+dropout: 0.1
+lr: 3.0e-4
+weight_decay: 0.01
+use_rnafm: true
+use_accessibility: true
+use_cross_attention: true
+predict_sites: true
+site_loss_weight: 0.3

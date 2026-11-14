@@ -5,6 +5,9 @@
   attention-MIL over a pair's sites (+ learned "no site" vector)             -> pair embedding
   pair embedding + pair features (site counts, length)                        -> logit
 The MIL attention weights say which site drove each prediction (binding-site track in the demo).
+
+With predict_sites=True the model also emits a logit per site, trained against ENCORI CLIP
+positions (v2). The head is only created when asked, so v1 checkpoints still load.
 """
 
 from __future__ import annotations
@@ -44,6 +47,7 @@ class SiteMIL(nn.Module):
         dropout: float = 0.1,
         use_cross_attention: bool = True,
         max_mir_len: int = 40,
+        predict_sites: bool = False,
         **_,
     ):
         super().__init__()
@@ -69,12 +73,18 @@ class SiteMIL(nn.Module):
             nn.Linear(in_dim, d), nn.ReLU(), nn.Dropout(dropout), nn.Linear(d, d)
         )
         self.mil_pool = AttnPool(d)
+        self.site_head = nn.Linear(d, 1) if predict_sites else None
         self.no_site = nn.Parameter(torch.zeros(d))
         self.head = nn.Sequential(
             nn.Linear(d + pair_feat_dim, d), nn.ReLU(), nn.Dropout(dropout), nn.Linear(d, 1)
         )
 
-    def forward(self, b: dict[str, torch.Tensor], return_attention: bool = False):
+    def forward(
+        self,
+        b: dict[str, torch.Tensor],
+        return_attention: bool = False,
+        return_site_logits: bool = False,
+    ):
         site_mask = b["site_mask"]
         bsz, n_site = site_mask.shape
         sb, ss = site_mask.nonzero(as_tuple=True)
@@ -103,9 +113,14 @@ class SiteMIL(nn.Module):
         z, attn = self.mil_pool(e_all, safe)
         z = torch.where(has[:, None], z.float(), self.no_site.float().expand(bsz, -1))
         logit = self.head(torch.cat([z, b["pair_feat"].float()], dim=-1)).squeeze(-1)
+        out = [logit]
         if return_attention:
-            return logit, attn * site_mask
-        return logit
+            out.append(attn * site_mask)
+        if return_site_logits:
+            if self.site_head is None:
+                raise ValueError("model was built with predict_sites=False")
+            out.append(self.site_head(e_all).squeeze(-1))
+        return out[0] if len(out) == 1 else tuple(out)
 
 
 class LitSiteModel(L.LightningModule):
@@ -115,16 +130,36 @@ class LitSiteModel(L.LightningModule):
         self.net = SiteMIL(**dims, **model_cfg)
         self.lr = model_cfg.get("lr", 3e-4)
         self.wd = model_cfg.get("weight_decay", 0.01)
+        self.site_loss_weight = float(model_cfg.get("site_loss_weight", 0.0))
+        self.predicts_sites = bool(model_cfg.get("predict_sites", False))
         self.loss = nn.BCEWithLogitsLoss()
+        self.site_loss = nn.BCEWithLogitsLoss(reduction="none")
         self._p: list[np.ndarray] = []
         self._y: list[np.ndarray] = []
 
-    def forward(self, batch):
-        return self.net(batch)
+    def forward(self, batch, **kw):
+        return self.net(batch, **kw)
+
+    def _site_term(self, site_logits, batch) -> torch.Tensor:
+        """BCE over candidate sites, averaged only where a CLIP peak mapped (label_mask)."""
+        mask = batch["label_mask"] & batch["site_mask"]
+        if not mask.any():
+            return site_logits.sum() * 0.0
+        per = self.site_loss(site_logits.float(), batch["site_label"].float())
+        return (per * mask).sum() / mask.sum()
 
     def training_step(self, batch, _):
-        loss = self.loss(self(batch), batch["label"])
-        self.log("train/loss", loss, prog_bar=True, batch_size=len(batch["label"]))
+        n = len(batch["label"])
+        if self.site_loss_weight > 0 and self.predicts_sites:
+            logit, site_logits = self(batch, return_site_logits=True)
+            pair_loss = self.loss(logit, batch["label"])
+            site_term = self._site_term(site_logits, batch)
+            loss = pair_loss + self.site_loss_weight * site_term
+            self.log("train/pair_loss", pair_loss, batch_size=n)
+            self.log("train/site_loss", site_term, prog_bar=True, batch_size=n)
+        else:
+            loss = self.loss(self(batch), batch["label"])
+        self.log("train/loss", loss, prog_bar=True, batch_size=n)
         return loss
 
     def validation_step(self, batch, _):
