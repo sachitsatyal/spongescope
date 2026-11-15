@@ -27,20 +27,30 @@ site_agg as (
         count(o.site_id)                         as n_sites_on_transcript,
         max(s.clip_exp_num)                      as max_clip_exp_num,
         max(s.degradome_exp_num)                 as max_degradome_exp_num,
-        string_agg(distinct s.site_type, ',')    as site_types
+        {{ string_agg_distinct('s.site_type', ',') }}    as site_types
     from sites as s
     left join on_rep as o
         on o.site_id = s.site_id
     group by s.gene_id, s.mimat_id
 ),
 
+-- NULLs are filtered out here, before the explode, rather than in a WHERE clause alongside it.
+-- On Snowflake the explode is a lateral join, which is evaluated per input row: split(NULL)
+-- yields NULL and flatten() over NULL produces no rows only with `outer => true`, so filtering
+-- first is what makes the two engines agree. On DuckDB this CTE is a plain passthrough.
+sites_with_context as (
+    select gene_id, mimat_id, cell_contexts
+    from sites
+    where cell_contexts is not null
+),
+
 contexts_long as (
     select
         gene_id,
         mimat_id,
-        trim(unnest(string_split(cell_contexts, ','))) as cell_context
-    from sites
-    where cell_contexts is not null
+        {{ csv_explode_value('cell_contexts') }} as cell_context
+    from sites_with_context
+    {{ csv_explode_join('cell_contexts') }}
 ),
 
 ctx_agg as (
@@ -48,7 +58,7 @@ ctx_agg as (
         gene_id,
         mimat_id,
         count(distinct cell_context)              as n_cell_contexts,
-        string_agg(distinct cell_context, ',')    as cell_contexts
+        {{ string_agg_distinct('cell_context', ',') }}    as cell_contexts
     from contexts_long
     where cell_context <> ''
     group by gene_id, mimat_id

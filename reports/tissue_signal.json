@@ -1,0 +1,70 @@
+{
+  "coverage": {
+    "mirna_atlas_known": 1.0,
+    "n_shared_organs": 1.0,
+    "coexpr": 0.8575562181454989,
+    "max_cooccur": 0.8712233597226914,
+    "mean_cooccur": 0.8712233597226914,
+    "lnc_max_level": 0.8712233597226914,
+    "mir_max_level": 0.8712233597226914,
+    "lnc_broad_frac": 0.8712233597226914,
+    "mir_broad_frac": 0.8712233597226914,
+    "lnc_n_expressed_tissues": 0.8756811538856983,
+    "lnc_tau": 0.8619552604908715
+  },
+  "univariate_auroc": {
+    "mirna_atlas_known": 0.4866273735780159,
+    "n_shared_organs": 0.4866273735780159,
+    "coexpr": 0.5081190179229985,
+    "max_cooccur": 0.5019957329220692,
+    "mean_cooccur": 0.49796567681891135,
+    "lnc_max_level": 0.5020571291107903,
+    "mir_max_level": 0.5075108289632909,
+    "lnc_broad_frac": 0.4969954400699556,
+    "mir_broad_frac": 0.5023571169971024,
+    "lnc_n_expressed_tissues": 0.5000914289308543,
+    "lnc_tau": 0.5015671927700127
+  },
+  "groups": {
+    "val": {
+      "aupr_site": 0.3786298033731271,
+      "aupr_tissue": 0.34003545946889857,
+      "delta_aupr": -0.038594343904228556,
+      "ci_lo": -0.12948541345512357,
+      "ci_hi": 0.0946178862908933,
+      "significant": false
+    },
+    "test": {
+      "aupr_site": 0.2731688873072713,
+      "aupr_tissue": 0.2825667829741053,
+      "delta_aupr": 0.009397895666834022,
+      "ci_lo": -0.01787061039693418,
+      "ci_hi": 0.03615374682421605,
+      "significant": false
+    },
+    "test_cold_lncrna": {
+      "aupr_site": 0.26735134502391317,
+      "aupr_tissue": 0.28516927864638847,
+      "delta_aupr": 0.0178179336224753,
+      "ci_lo": -0.010128437685885975,
+      "ci_hi": 0.04306400164443106,
+      "significant": false
+    },
+    "test_cold_both": {
+      "aupr_site": 0.33909863166283116,
+      "aupr_tissue": 0.2684692337103209,
+      "delta_aupr": -0.07062939795251028,
+      "ci_lo": -0.13935721430205092,
+      "ci_hi": 0.0126062136679218,
+      "significant": false
+    },
+    "test_seed_controlled": {
+      "aupr_site": 0.31693882724249123,
+      "aupr_tissue": 0.3254951948478384,
+      "delta_aupr": 0.00855636760534717,
+      "ci_lo": -0.01586878065768888,
+      "ci_hi": 0.029752864023544066,
+      "significant": false
+    }
+  }
+}

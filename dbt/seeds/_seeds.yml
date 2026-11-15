@@ -1,0 +1,13 @@
+version: 2
+
+seeds:
+  - name: tissue_map
+    description: >
+      GTEx tissue -> miRNATissueAtlas organ_system, curated by hand at ORGAN level. GTEx names
+      carry an organ prefix and the atlas already groups by organ_system, so organ-level matching
+      needs ~28 decisions instead of 68 and avoids arbitrary sub-region pairings. Two GTEx entries
+      are deliberately unmapped (cultured fibroblasts, EBV-transformed lymphocytes): they are cell
+      cultures, not tissues.
+    columns:
+      - name: gtex_tissue
+        data_tests: [unique, not_null]

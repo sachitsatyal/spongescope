@@ -3,8 +3,8 @@ select
     split_part(transcript_id, '.', 1) as transcript_id,
     split_part(gene_id, '.', 1)       as gene_id,
     chrom,
-    "start"                           as exon_start,
-    "end"                             as exon_end,
+    {{ raw_col('start') }}                           as exon_start,
+    {{ raw_col('end') }}                             as exon_end,
     strand,
     exon_number
 from {{ source('raw', 'gencode_lncrna_exons') }}

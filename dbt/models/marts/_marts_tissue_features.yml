@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: fct_pair_tissue_features
+    description: Organ-level expression context per pair; one row per pair in fct_pairs.
+    columns:
+      - name: pair_id
+        data_tests: [unique, not_null]
+      - name: mirna_atlas_known
+        data_tests: [not_null]

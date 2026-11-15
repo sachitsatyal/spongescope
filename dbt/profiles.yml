@@ -9,9 +9,13 @@ spongescope:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT', 'not_set') }}"
       user: "{{ env_var('SNOWFLAKE_USER', 'not_set') }}"
-      password: "{{ env_var('SNOWFLAKE_PASSWORD', 'not_set') }}"
-      role: "{{ env_var('SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
-      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
-      database: SPONGESCOPE
+      # Key-pair, not password: Snowflake finished deprecating single-factor password login in
+      # October 2026. A human user would need MFA on every connection and a SERVICE user cannot
+      # hold a password at all. Generate the key with scripts/snowflake_keypair.py.
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH', 'not_set') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE', '') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'SPONGESCOPE_ROLE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'SPONGESCOPE_WH') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'SPONGESCOPE') }}"
       schema: PUBLIC
       threads: 4
