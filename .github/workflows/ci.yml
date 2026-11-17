@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A new push to the same branch cancels the previous run: on a free plan the minutes are the
+# scarce resource, and a superseded run tells you nothing.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # Only ruff is installed. The project depends on torch, which is ~800 MB and several
+      # minutes; pulling it in to check formatting would make the fast feedback slow enough
+      # that nobody waits for it.
+      - run: uv tool install ruff
+      - run: uv tool run ruff check .
+      - run: uv tool run ruff format --check .
+
+  dbt:
+    name: dbt parse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv venv
+      - run: uv pip install dbt-core dbt-duckdb
+      # `dbt parse` compiles every model and macro without connecting to a warehouse, so it
+      # catches Jinja errors, bad refs and malformed YAML -- the failures that have actually
+      # bitten this project -- without needing any data in CI.
+      - name: Parse the project
+        working-directory: dbt
+        run: uv run dbt parse --profiles-dir . --target dev
+
+  tests:
+    name: pytest (data-independent)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv venv
+      - run: uv pip install pytest pandas pyarrow numpy duckdb
+      # --no-deps installs the package so `import spongescope` resolves, without dragging in
+      # torch and the rest of the training stack that these tests never touch.
+      - run: uv pip install -e . --no-deps
+      # Deliberately a subset. Most of the suite needs the 4.6 GB feature cache or a GPU-trained
+      # checkpoint, neither of which belongs in CI. These are the tests that are pure functions
+      # of their inputs: the demo's query layer and the Snowflake loader's reshaping.
+      - name: Run the tests that need no data
+        run: uv run pytest tests/test_demo_data.py tests/test_load_snowflake.py -q
